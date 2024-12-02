@@ -1,33 +1,47 @@
 name: Build and Test
 
 on:
-  workflow_dispatch: # Allows manual triggers of the workflow
+  workflow_dispatch:
   pull_request:
-    types: [opened, reopened, synchronize] # Runs on specific PR events
+    types: [opened, reopened, synchronize]
 
 jobs:
   build:
     runs-on: macos-latest
+
+    permissions:
+      contents: write
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.GH_TOKEN }}
+
+      # - name: Configure Git for HTTPS
+      #   run: git config --global url."https://github.com/".insteadOf "git@github.com:"
+
+      - name: Clear SPM Cache
+        run: |
+          rm -rf ~/Library/Caches/org.swift.swiftpm
+          rm -rf .build
+
+      - name: Regenerate Dependencies
+        run: swift package resolve
+
+      - name: Debug Package.resolved
+        run: cat Package.resolved
 
       - name: Set up Ruby Environment
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.0
-
-      - name: Verify Gemfile Exists
-        run: |
-          if [ ! -f Gemfile ]; then
-            echo "Gemfile not found in $(pwd). Check your repository structure."
-            exit 1
-          fi
+          ruby-version: 3.2.4
 
       - name: Install Dependencies
         run: bundle install
 
       - name: Compile and Run Tests
+        env:
+          FASTLANE_TOKEN: ${{ secrets.FASTLANE_TOKEN }}
         run: bundle exec fastlane test
