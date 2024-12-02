@@ -6,7 +6,35 @@ on:
     types: [opened, reopened, synchronize]
 
 jobs:
-  build:
+  lint:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/ciaranmul/swiftlintdocker:v0.51.0
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 11
+
+      - name: Add GitHub to Known Hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keygen -F github.com || ssh-keyscan github.com >> ~/.ssh/known_hosts
+
+      - name: Setup SwiftLint Configuration Submodule
+        run: git submodule update --init --recursive
+
+      - name: Lint Project
+        run: |
+          swiftlint lint --reporter html | tee swiftlint.result.html
+
+      - name: Upload Lint Results
+        uses: actions/upload-artifact@v3
+        with:
+          name: lint-results
+          path: swiftlint.result.html
+
+  build_and_test:
     runs-on: macos-latest
 
     permissions:
@@ -16,32 +44,46 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-      
+          fetch-depth: 11
 
-      # - name: Configure Git for HTTPS
-      #   run: git config --global url."https://github.com/".insteadOf "git@github.com:"
-
-      - name: Clear SPM Cache
+      - name: Add GitHub to Known Hosts
         run: |
-          rm -rf ~/Library/Caches/org.swift.swiftpm
-          rm -rf .build
+          mkdir -p ~/.ssh
+          ssh-keygen -F github.com || ssh-keyscan github.com >> ~/.ssh/known_hosts
 
-      - name: Regenerate Dependencies
-        run: swift package resolve
+      - name: Merge Base Branch
+        run: |
+          git merge origin/$(bash scripts/get_base_branch.sh) --ff-only
 
-      - name: Debug Package.resolved
-        run: cat Package.resolved
-
-      - name: Set up Ruby Environment
-        uses: ruby/setup-ruby@v1
+      - name: Restore Cached Gems
+        uses: actions/cache@v3
         with:
-          ruby-version: 3.2.4
+          path: vendor/bundle
+          key: gem-cache-${{ runner.os }}-${{ github.ref_name }}-${{ hashFiles('Gemfile.lock') }}
+          restore-keys: |
+            gem-cache-${{ runner.os }}-${{ github.ref_name }}
+            gem-cache-${{ runner.os }}
 
-      - name: Install Dependencies
-        run: bundle install
+      - name: Bootstrap Environment
+        run: ./scripts/bootstrap_circle.sh
 
-      - name: Compile and Run Tests
-        env:
-          FASTLANE_TOKEN: ${{ secrets.FASTLANE_TOKEN }}
-        run: bundle exec fastlane test
+      - name: Save Cached Gems
+        uses: actions/cache@v3
+        with:
+          path: vendor/bundle
+          key: gem-cache-${{ runner.os }}-${{ github.ref_name }}-${{ hashFiles('Gemfile.lock') }}
+
+      - name: Run Tests
+        run: bundle exec fastlane ios test
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v3
+        with:
+          name: Test-Results
+          path: fastlane/test_output/report.html
+
+      - name: Upload Scan Logs
+        uses: actions/upload-artifact@v3
+        with:
+          name: scan-logs
+          path: ~/Library/Logs/scan
