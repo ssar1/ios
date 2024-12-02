@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 11
-          repository: slicelife/logging-ios
+          repository: ssar1/ghteam
           ref: main # Replace 'main' with the default branch name
           token: ${{ secrets.GH_PAT }}
          
