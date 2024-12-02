@@ -37,7 +37,7 @@ jobs:
 
       - name: Clone logging-ios Repository
         run: |
-          git clone git@github.com:ssar-1/Ghteam.git
+      
           git clone git@github.com:ssar1/ghteam.git
           
       - name: Setup SwiftLint Configuration Submodule
