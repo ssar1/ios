@@ -19,6 +19,13 @@ jobs:
         with:
           ruby-version: 3.0
 
+      - name: Verify Gemfile Exists
+        run: |
+          if [ ! -f Gemfile ]; then
+            echo "Gemfile not found in $(pwd). Check your repository structure."
+            exit 1
+          fi
+
       - name: Install Dependencies
         run: bundle install
 
