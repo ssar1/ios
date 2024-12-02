@@ -1,0 +1,26 @@
+name: Build and Test
+
+on:
+  workflow_dispatch: # Allows manual triggers of the workflow
+  pull_request:
+    types: [opened, reopened, synchronize] # Runs on specific PR events
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Ruby Environment
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.0
+
+      - name: Install Dependencies
+        run: bundle install
+
+      - name: Compile and Run Tests
+        run: bundle exec fastlane test
