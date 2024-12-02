@@ -5,6 +5,8 @@ on:
   pull_request:
     types: [opened, reopened, synchronize]
 
+
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -16,10 +18,14 @@ jobs:
         with:
           fetch-depth: 11
 
-      - name: Add GitHub to Known Hosts
+      - name: Generate SSH Key for Repository Access
         run: |
-          mkdir -p ~/.ssh
-          ssh-keygen -F github.com || ssh-keyscan github.com >> ~/.ssh/known_hosts
+          ssh-keygen -t rsa -b 4096 -C "github-actions@github.com" -f ~/.ssh/id_rsa -N ""
+          echo "Host github.com\n  HostName github.com\n  User git\n  IdentityFile ~/.ssh/id_rsa\n  StrictHostKeyChecking no" > ~/.ssh/config
+
+      - name: Add Public Key to Known Hosts
+        run: |
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
 
       - name: Setup SwiftLint Configuration Submodule
         run: git submodule update --init --recursive
@@ -46,10 +52,14 @@ jobs:
         with:
           fetch-depth: 11
 
-      - name: Add GitHub to Known Hosts
+      - name: Generate SSH Key for Repository Access
         run: |
-          mkdir -p ~/.ssh
-          ssh-keygen -F github.com || ssh-keyscan github.com >> ~/.ssh/known_hosts
+          ssh-keygen -t rsa -b 4096 -C "github-actions@github.com" -f ~/.ssh/id_rsa -N ""
+          echo "Host github.com\n  HostName github.com\n  User git\n  IdentityFile ~/.ssh/id_rsa\n  StrictHostKeyChecking no" > ~/.ssh/config
+
+      - name: Add Public Key to Known Hosts
+        run: |
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
 
       - name: Merge Base Branch
         run: |
