@@ -7,13 +7,10 @@ on:
 
 
 
-
-
-
-
 jobs:
-  lint:
+  build:
     runs-on: macos-latest
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -32,25 +29,18 @@ jobs:
 
       - name: Output Public Key
         run: |
-          echo "Add the following public key to GitHub as a deploy key:" 
+          echo "Add the following public key to the repository 'ssar1/ghteam' as a deploy key:"
           cat ~/.ssh/id_rsa.pub
 
-      - name: Clone logging-ios Repository
+      - name: Ensure SSH Key is Loaded
         run: |
-      
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/id_rsa
+
+      - name: Debug SSH Authentication
+        run: |
+          ssh -v -i ~/.ssh/id_rsa -T git@github.com || echo "SSH authentication failed"
+
+      - name: Clone Target Repository
+        run: |
           git clone git@github.com:ssar1/ghteam.git
-          
-      - name: Setup SwiftLint Configuration Submodule
-        run: git submodule update --init --recursive
-
-      - name: Lint Project
-        run: |
-          swiftlint lint --reporter html | tee swiftlint.result.html
-
-      - name: Upload Lint Results
-        uses: actions/upload-artifact@v3
-        with:
-          name: lint-results
-          path: swiftlint.result.html
-
-
