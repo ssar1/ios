@@ -16,31 +16,36 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 11
+          repository: slicelife/logging-ios
+          ref: main # Replace 'main' with the default branch name
+          token: ${{ secrets.GH_PAT }}
+         
 
-      - name: Generate SSH Key for Repository Access
-        run: |
-          mkdir -p ~/.ssh
-          ssh-keygen -t rsa -b 4096 -C "github-actions@github.com" -f ~/.ssh/id_rsa -N ""
-          echo "Host github.com\n  HostName github.com\n  User git\n  IdentityFile ~/.ssh/id_rsa\n  StrictHostKeyChecking no" > ~/.ssh/config
 
-      - name: Add Public Key to Known Hosts
-        run: |
-          ssh-keyscan github.com >> ~/.ssh/known_hosts
+      # - name: Generate SSH Key for Repository Access
+      #   run: |
+      #     mkdir -p ~/.ssh
+      #     ssh-keygen -t rsa -b 4096 -C "github-actions@github.com" -f ~/.ssh/id_rsa -N ""
+      #     echo "Host github.com\n  HostName github.com\n  User git\n  IdentityFile ~/.ssh/id_rsa\n  StrictHostKeyChecking no" > ~/.ssh/config
 
-      - name: Output Public Key
-        run: |
-          echo "Add the following public key to the repository 'ssar1/ghteam' as a deploy key:"
-          cat ~/.ssh/id_rsa.pub
+      # - name: Add Public Key to Known Hosts
+      #   run: |
+      #     ssh-keyscan github.com >> ~/.ssh/known_hosts
 
-      - name: Ensure SSH Key is Loaded
-        run: |
-          eval "$(ssh-agent -s)"
-          ssh-add ~/.ssh/id_rsa
+      # - name: Output Public Key
+      #   run: |
+      #     echo "Add the following public key to the repository 'ssar1/ghteam' as a deploy key:"
+      #     cat ~/.ssh/id_rsa.pub
 
-      - name: Debug SSH Authentication
-        run: |
-          ssh -v -i ~/.ssh/id_rsa -T git@github.com || echo "SSH authentication failed"
+      # - name: Ensure SSH Key is Loaded
+      #   run: |
+      #     eval "$(ssh-agent -s)"
+      #     ssh-add ~/.ssh/id_rsa
 
-      - name: Clone Target Repository
-        run: |
-          git clone git@github.com:ssar1/ghteam.git
+      # - name: Debug SSH Authentication
+      #   run: |
+      #     ssh -v -i ~/.ssh/id_rsa -T git@github.com || echo "SSH authentication failed"
+
+      # - name: Clone Target Repository
+      #   run: |
+      #     git clone git@github.com:ssar1/ghteam.git
