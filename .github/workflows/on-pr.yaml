@@ -7,6 +7,8 @@ on:
 
 
 
+
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -20,6 +22,7 @@ jobs:
 
       - name: Generate SSH Key for Repository Access
         run: |
+          mkdir -p ~/.ssh
           ssh-keygen -t rsa -b 4096 -C "github-actions@github.com" -f ~/.ssh/id_rsa -N ""
           echo "Host github.com\n  HostName github.com\n  User git\n  IdentityFile ~/.ssh/id_rsa\n  StrictHostKeyChecking no" > ~/.ssh/config
 
@@ -54,46 +57,6 @@ jobs:
 
       - name: Generate SSH Key for Repository Access
         run: |
+          mkdir -p ~/.ssh
           ssh-keygen -t rsa -b 4096 -C "github-actions@github.com" -f ~/.ssh/id_rsa -N ""
-          echo "Host github.com\n  HostName github.com\n  User git\n  IdentityFile ~/.ssh/id_rsa\n  StrictHostKeyChecking no" > ~/.ssh/config
-
-      - name: Add Public Key to Known Hosts
-        run: |
-          ssh-keyscan github.com >> ~/.ssh/known_hosts
-
-      - name: Merge Base Branch
-        run: |
-          git merge origin/$(bash scripts/get_base_branch.sh) --ff-only
-
-      - name: Restore Cached Gems
-        uses: actions/cache@v3
-        with:
-          path: vendor/bundle
-          key: gem-cache-${{ runner.os }}-${{ github.ref_name }}-${{ hashFiles('Gemfile.lock') }}
-          restore-keys: |
-            gem-cache-${{ runner.os }}-${{ github.ref_name }}
-            gem-cache-${{ runner.os }}
-
-      - name: Bootstrap Environment
-        run: ./scripts/bootstrap_circle.sh
-
-      - name: Save Cached Gems
-        uses: actions/cache@v3
-        with:
-          path: vendor/bundle
-          key: gem-cache-${{ runner.os }}-${{ github.ref_name }}-${{ hashFiles('Gemfile.lock') }}
-
-      - name: Run Tests
-        run: bundle exec fastlane ios test
-
-      - name: Upload Test Results
-        uses: actions/upload-artifact@v3
-        with:
-          name: Test-Results
-          path: fastlane/test_output/report.html
-
-      - name: Upload Scan Logs
-        uses: actions/upload-artifact@v3
-        with:
-          name: scan-logs
-          path: ~/Library/Logs/scan
+          echo "Host github.com\n  HostName github.com\n  User git\n  I
