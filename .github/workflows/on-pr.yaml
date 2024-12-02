@@ -1,51 +1,34 @@
 name: Build and Test
 
 on:
-  workflow_dispatch:
   pull_request:
     types: [opened, reopened, synchronize]
 
-
-
 jobs:
-  build:
+  build_and_test:
     runs-on: macos-latest
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 11
-          repository: ssar1/ghteam
-          ref: main # Replace 'main' with the default branch name
-          token: ${{ secrets.GH_PAT }}
-         
+          fetch-depth: 0
 
+      - name: Clean Workspace
+        run: |
+          rm -rf ~/Library/Developer/Xcode/DerivedData
+          rm -rf ~/Library/Caches/org.swift.swiftpm
 
-      # - name: Generate SSH Key for Repository Access
-      #   run: |
-      #     mkdir -p ~/.ssh
-      #     ssh-keygen -t rsa -b 4096 -C "github-actions@github.com" -f ~/.ssh/id_rsa -N ""
-      #     echo "Host github.com\n  HostName github.com\n  User git\n  IdentityFile ~/.ssh/id_rsa\n  StrictHostKeyChecking no" > ~/.ssh/config
+      - name: Reset Simulators
+        run: xcrun simctl shutdown all && xcrun simctl erase all
 
-      # - name: Add Public Key to Known Hosts
-      #   run: |
-      #     ssh-keyscan github.com >> ~/.ssh/known_hosts
+      - name: Setup Ruby Environment
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.2.2
 
-      # - name: Output Public Key
-      #   run: |
-      #     echo "Add the following public key to the repository 'ssar1/ghteam' as a deploy key:"
-      #     cat ~/.ssh/id_rsa.pub
+      - name: Install Dependencies
+        run: bundle install --jobs 4 --retry 3
 
-      # - name: Ensure SSH Key is Loaded
-      #   run: |
-      #     eval "$(ssh-agent -s)"
-      #     ssh-add ~/.ssh/id_rsa
-
-      # - name: Debug SSH Authentication
-      #   run: |
-      #     ssh -v -i ~/.ssh/id_rsa -T git@github.com || echo "SSH authentication failed"
-
-      # - name: Clone Target Repository
-      #   run: |
-      #     git clone git@github.com:ssar1/ghteam.git
+      - name: Run Tests
+        run: bundle exec fastlane test --verbose
