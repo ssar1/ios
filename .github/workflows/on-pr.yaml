@@ -30,6 +30,16 @@ jobs:
         run: |
           ssh-keyscan github.com >> ~/.ssh/known_hosts
 
+      - name: Output Public Key
+        run: |
+          echo "Add the following public key to GitHub as a deploy key:" 
+          cat ~/.ssh/id_rsa.pub
+
+      - name: Clone logging-ios Repository
+        run: |
+          git clone git@github.com:ssar-1/Ghteam.git
+          git clone git@github.com:ssar1/ghteam.git
+          
       - name: Setup SwiftLint Configuration Submodule
         run: git submodule update --init --recursive
 
