@@ -9,11 +9,11 @@ on:
 
 
 
+
+
 jobs:
   lint:
     runs-on: macos-latest
-    container:
-      image: ghcr.io/ciaranmul/swiftlintdocker:v0.51.0
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -43,20 +43,4 @@ jobs:
           name: lint-results
           path: swiftlint.result.html
 
-  build_and_test:
-    runs-on: macos-latest
-
-    permissions:
-      contents: write
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 11
-
-      - name: Generate SSH Key for Repository Access
-        run: |
-          mkdir -p ~/.ssh
-          ssh-keygen -t rsa -b 4096 -C "github-actions@github.com" -f ~/.ssh/id_rsa -N ""
-          echo "Host github.com\n  HostName github.com\n  User git\n  I
+  build_and
