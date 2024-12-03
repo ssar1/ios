@@ -15,33 +15,15 @@ jobs:
         with:
           ruby-version: 3.2.4
           bundler-cache: true
-
+      - name: Check Ruby Version
+        run: ruby -v
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Debug Repository Contents
-        run: ls -la
-
-      - name: Install Dependencies/setup Fastlane
-        run: |
-          echo "Overriding Ruby version for Bundler to avoid mismatch"
-          export BUNDLE_IGNORE_PLATFORM=true
-          bundle install --gemfile=$GITHUB_WORKSPACE/Gemfile
-
-      - name: Update Fastlane
-        run: bundle update fastlane
-
-      - name: List Available Fastlane Lanes
-        run: bundle exec fastlane lanes
-
-      - name: Checkout logging-ios Repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          repository: slicelife/logging-ios
-          token: ${{ secrets.GH_PAT }}
+     
+   
 
       - name: Compile and Run Tests
         run: |
