@@ -18,9 +18,9 @@ jobs:
         run: |
           ls -la
           cd ..
-      - name: Debug Repository Contents
+      - name: cat 
         run: |
-          ls -la
+          cat Test.java
           
 
       - name: Clean Workspace
