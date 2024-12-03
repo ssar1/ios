@@ -18,9 +18,9 @@ jobs:
           ruby-version: 3.2.4
           bundler-cache: true
 
-      - name: Install Dependencies for General Tasks
-        run: |
-          bundle install --gemfile=$GITHUB_WORKSPACE/Gemfile
+      # - name: Install Dependencies for General Tasks
+      #   run: |
+      #     bundle install --gemfile=$GITHUB_WORKSPACE/Gemfile
 
       # Step 2: Switch to Ruby 3.2.2 for Fastlane
       - name: Set up Ruby Environment (3.2.2) for Fastlane
