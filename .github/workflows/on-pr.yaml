@@ -5,34 +5,37 @@ on:
   pull_request:
     types: [opened, reopened, synchronize]
 
+
 jobs:
   build:
     runs-on: macos-latest
 
     steps:
+      # Step 1: Use Ruby 3.2.4 for other tasks
       - name: Set up Ruby Environment (3.2.4)
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: 3.2.4
           bundler-cache: true
-      - name: Check Ruby Version
-        run: ruby -v
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-     
-   
-
-      - name: Compile and Run Tests
+      - name: Install Dependencies for General Tasks
         run: |
-          echo "Using Ruby 3.2.2 for Fastlane compatibility"
-          rbenv install 3.2.2 --skip-existing
-          rbenv global 3.2.2
           bundle install --gemfile=$GITHUB_WORKSPACE/Gemfile
-          bundle exec fastlane ios test
 
+      # Step 2: Switch to Ruby 3.2.2 for Fastlane
+      - name: Set up Ruby Environment (3.2.2) for Fastlane
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.2.2
+          bundler-cache: true
+
+      - name: Install Dependencies for Fastlane
+        run: |
+          bundle install --gemfile=$GITHUB_WORKSPACE/Gemfile
+
+      - name: Run Fastlane Lanes
+        run: |
+          bundle exec fastlane ios test
 
     
 
