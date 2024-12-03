@@ -6,33 +6,52 @@ on:
     types: [opened, reopened, synchronize]
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-
-    container:
-      image: ghcr.io/ciaranmul/swiftlintdocker:v0.51.0
+  build:
+    runs-on: macos-latest
 
     steps:
-      # Step 1: Checkout the code
+      - name: Set up Ruby Environment (3.2.4)
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.2.4
+          bundler-cache: true
+
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          submodules: recursive
+
+      - name: Debug Repository Contents
+        run: ls -la
+
+      - name: Install Dependencies/setup Fastlane
+        run: |
+          echo "Overriding Ruby version for Bundler to avoid mismatch"
+          export BUNDLE_IGNORE_PLATFORM=true
+          bundle install --gemfile=$GITHUB_WORKSPACE/Gemfile
+
+      - name: Update Fastlane
+        run: bundle update fastlane
+
+      - name: List Available Fastlane Lanes
+        run: bundle exec fastlane lanes
+
+      - name: Checkout logging-ios Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          repository: slicelife/logging-ios
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Compile and Run Tests
+        run: |
+          echo "Using Ruby 3.2.2 for Fastlane compatibility"
+          rbenv install 3.2.2 --skip-existing
+          rbenv global 3.2.2
+          bundle install --gemfile=$GITHUB_WORKSPACE/Gemfile
+          bundle exec fastlane ios test
+
 
     
 
-      # Step 3: Update Submodules
-      - name: Setup SwiftLint Configuration Submodules
-        run: git submodule update --init --recursive
-
-      # Step 4: Lint Project
-      - name: Lint Project
-        run: swiftlint lint --reporter html | tee swiftlint.result.html
-
-      # Step 5: Upload Lint Results as Artifacts
-      - name: Upload Lint Results
-        uses: actions/upload-artifact@v3
-        with:
-          name: Lint-Results
-          path: swiftlint.result.html
+      
