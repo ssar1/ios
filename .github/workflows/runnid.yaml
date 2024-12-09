@@ -22,9 +22,10 @@ jobs:
         run: |
           if [ -z "${{ github.event.inputs.build_identifier }}" ]; then
             echo "BUILD_ID=${{ github.run_id }}" >> $GITHUB_ENV
-          else:
+          else
             echo "BUILD_ID=${{ github.event.inputs.build_identifier }}" >> $GITHUB_ENV
           fi
 
       - name: Display Build Identifier
-        run: echo "Build Identifier: $BUILD_ID"
+        run: |
+          echo "Build Identifier: $BUILD_ID"
