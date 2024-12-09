@@ -1,0 +1,30 @@
+name: Deploy QA Custom Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_identifier:
+        description: "Provide build identifier or leave empty for default value"
+        type: string
+        required: false
+
+jobs:
+  deploy_qa:
+    runs-on: macos-15
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set Build Identifier
+        id: set_build_id
+        run: |
+          if [ -z "${{ github.event.inputs.build_identifier }}" ]; then
+            echo "BUILD_ID=${{ github.run_id }}" >> $GITHUB_ENV
+          else:
+            echo "BUILD_ID=${{ github.event.inputs.build_identifier }}" >> $GITHUB_ENV
+          fi
+
+      - name: Display Build Identifier
+        run: echo "Build Identifier: $BUILD_ID"
