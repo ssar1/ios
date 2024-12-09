@@ -1,0 +1,15 @@
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Fetch full history to access previous commits
+
+      - name: Fetch Previous Commit
+        id: fetch_previous_commit
+        run: echo "GIT_PREVIOUS_SUCCESSFUL_COMMIT=$(git rev-parse HEAD~1)" >> $GITHUB_ENV
+
+      - name: Debug Previous Commit
+        run: echo "Previous Commit: $GIT_PREVIOUS_SUCCESSFUL_COMMIT"
