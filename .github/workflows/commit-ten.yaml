@@ -1,15 +1,28 @@
+name: Commit Ten Workflow
+
+on:
+  push:
+    branches:
+      - main
+
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Fetch full history to access previous commits
+          fetch-depth: 0  # Ensure full history is fetched for commit range
 
       - name: Fetch Previous Commit
         id: fetch_previous_commit
-        run: echo "GIT_PREVIOUS_SUCCESSFUL_COMMIT=$(git rev-parse HEAD~1)" >> $GITHUB_ENV
+        run: echo "GIT_PREVIOUS_SUCCESSFUL_COMMIT=$(git rev-parse HEAD~10)" >> $GITHUB_ENV
 
       - name: Debug Previous Commit
         run: echo "Previous Commit: $GIT_PREVIOUS_SUCCESSFUL_COMMIT"
+
+      - name: Set Up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.1  # Adjust to your required Ruby version
